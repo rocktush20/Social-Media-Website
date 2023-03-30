@@ -1,5 +1,7 @@
 const user = require("../models/users");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const loginController = async (req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
@@ -13,7 +15,8 @@ const loginController = async (req,res)=>{
     
     if(await bcrypt.compare(password,User.password))
     {
-        res.status(201).json(User);
+        const AccessToken = generateAccessToken({_id: User._id, email: User.email});
+        res.status(200).json({AccessToken});
     }
     else
     {
@@ -35,6 +38,16 @@ const signupController = async (req,res)=>{
     const newUser = new user({email,password : hashPass});
     await newUser.save();
     res.status(200).send(newUser);
+}
+
+const generateAccessToken = (data)=>{
+    try {
+        const token = jwt.sign(data,"ufhehfbjksafufh",{expiresIn: '60s'});
+        return token;
+    } 
+    catch (error) {
+        console.log(error);
+    }
 }
 
 module.exports = {loginController,signupController};
